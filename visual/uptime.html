@@ -1,0 +1,835 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta
+    name="description"
+    content="Repository availability monitoring for the Small Smart Sandbox."
+  >
+
+  <title>SSSB — System Status</title>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #ffffff;
+      --surface: #f8f9fb;
+      --border: #e8eaf0;
+      --text: #171923;
+      --muted: #737887;
+      --accent: #4f46e5;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .container {
+      width: min(100% - 48px, 880px);
+      margin-inline: auto;
+    }
+
+    .site-header {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 76px;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      overflow-wrap: anywhere;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-label,
+    .back-link {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .back-link {
+      white-space: nowrap;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+
+    main {
+      flex: 1;
+      padding-block: 80px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .indicator {
+      width: 7px;
+      height: 7px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 72px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.065em;
+    }
+
+    h1 span {
+      color: #8b90a0;
+    }
+
+    .intro {
+      max-width: 540px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .divider {
+      height: 1px;
+      margin-block: 48px 32px;
+      background: var(--border);
+    }
+
+    .monitor-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .monitor-header h2 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+    }
+
+    .monitor-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .refresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .refresh:hover {
+      background: #f1f2f6;
+    }
+
+    .refresh:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 20px 12px 20px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat strong {
+      margin-left: auto;
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #9ca3af;
+    }
+
+    .dot.up {
+      background: var(--green);
+    }
+
+    .dot.down {
+      background: var(--red);
+    }
+
+    .dot.error {
+      background: var(--amber);
+    }
+
+    .repo-list {
+      margin-top: 8px;
+    }
+
+    .repo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 17px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .repo-details {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .repo-name {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .repo-name:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .repo-description {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .repo-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .repo-status[data-state="up"] {
+      color: var(--green);
+    }
+
+    .repo-status[data-state="down"] {
+      color: var(--red);
+    }
+
+    .repo-status[data-state="error"] {
+      color: var(--amber);
+    }
+
+    .empty {
+      padding: 26px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .meta a {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .note {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding-block: 24px;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(100% - 36px, 880px);
+      }
+
+      .nav-inner {
+        min-height: 68px;
+        gap: 12px;
+      }
+
+      .brand {
+        gap: 9px;
+        font-size: 13px;
+      }
+
+      .brand-logo {
+        width: 28px;
+        height: 28px;
+      }
+
+      .nav-right {
+        gap: 10px;
+      }
+
+      .nav-label {
+        display: none;
+      }
+
+      main {
+        padding-block: 60px;
+      }
+
+      .divider {
+        margin-block: 36px 28px;
+      }
+
+      .monitor-header {
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .stat {
+        padding: 13px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .stat:last-child {
+        border-bottom: 0;
+      }
+
+      .repo-item {
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .repo-status {
+        padding-top: 2px;
+        text-align: right;
+      }
+
+      .footer-content {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="container nav-inner" aria-label="Main navigation">
+      <a class="brand" href="./" aria-label="SSSB home">
+        <img
+          class="brand-logo"
+          src="./logo.png"
+          alt=""
+          width="32"
+          height="32"
+        >
+        <span class="brand-name">Small Smart Sandbox</span>
+      </a>
+
+      <div class="nav-right">
+        <span class="nav-label">Infrastructure / Status</span>
+        <a class="back-link" href="./">← Back</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="eyebrow">
+        <span class="indicator" aria-hidden="true"></span>
+        Core Infrastructure
+      </div>
+
+      <h1>
+        Repository<br>
+        <span>status.</span>
+      </h1>
+
+      <p class="intro">
+        A live overview of public repositories in the Small Smart
+        Sandbox organization. Each repository is checked through
+        the GitHub API.
+      </p>
+
+      <div class="divider" aria-hidden="true"></div>
+
+      <section aria-labelledby="monitor-heading">
+        <div class="monitor-header">
+          <div>
+            <h2 id="monitor-heading">Availability Monitor</h2>
+            <p>
+              Public repository discovery and availability checks.
+            </p>
+          </div>
+
+          <div class="actions">
+            <span class="count" id="uptime-count">Loading…</span>
+
+            <button
+              class="refresh"
+              id="uptime-refresh"
+              type="button"
+            >
+              ↻ Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="summary" aria-live="polite">
+          <div class="stat">
+            <span class="dot up" aria-hidden="true"></span>
+            Operational
+            <strong id="uptime-up">—</strong>
+          </div>
+
+          <div class="stat">
+            <span class="dot down" aria-hidden="true"></span>
+            Unavailable
+            <strong id="uptime-down">—</strong>
+          </div>
+
+          <div class="stat">
+            <span class="dot error" aria-hidden="true"></span>
+            Unknown
+            <strong id="uptime-unknown">—</strong>
+          </div>
+        </div>
+
+        <div
+          class="repo-list"
+          id="uptime-list"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <p class="empty">Discovering repositories…</p>
+        </div>
+
+        <div class="meta">
+          <span id="uptime-last-check">No checks completed yet.</span>
+
+          <a
+            href="https://github.com/SmallSmartSandbox"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View organization ↗
+          </a>
+        </div>
+
+        <div class="note">
+          This monitor checks public GitHub repository metadata. It does
+          not measure website uptime or application health. Network errors
+          and API limits are reported as unknown rather than downtime.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <span>© Small Smart Sandbox</span>
+      <span>Repository Monitoring</span>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const ORG = "SmallSmartSandbox";
+      const API = "https://api.github.com";
+      const CONCURRENCY = 5;
+
+      const el = {
+        list: document.getElementById("uptime-list"),
+        refresh: document.getElementById("uptime-refresh"),
+        count: document.getElementById("uptime-count"),
+        up: document.getElementById("uptime-up"),
+        down: document.getElementById("uptime-down"),
+        unknown: document.getElementById("uptime-unknown"),
+        lastCheck: document.getElementById("uptime-last-check")
+      };
+
+      let running = false;
+
+      function node(tag, className, text) {
+        const element = document.createElement(tag);
+
+        if (className) element.className = className;
+        if (text !== undefined) element.textContent = text;
+
+        return element;
+      }
+
+      async function request(url) {
+        const response = await fetch(url, {
+          headers: {
+            Accept: "application/vnd.github+json"
+          },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          const error = new Error(`HTTP ${response.status}`);
+          error.status = response.status;
+          throw error;
+        }
+
+        return response.json();
+      }
+
+      async function discoverRepositories() {
+        const repositories = [];
+
+        for (let page = 1; ; page++) {
+          const url =
+            `${API}/orgs/${ORG}/repos` +
+            `?per_page=100&page=${page}&type=public&sort=full_name`;
+
+          const batch = await request(url);
+          repositories.push(...batch);
+
+          if (batch.length < 100) break;
+        }
+
+        return repositories.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+      }
+
+      function makeRow(repository) {
+        const row = node("div", "repo-item");
+        const details = node("div", "repo-details");
+        const link = node("a", "repo-name", repository.name);
+
+        link.href = repository.html_url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        const description = node(
+          "p",
+          "repo-description",
+          repository.description || "No description provided."
+        );
+
+        details.append(link, description);
+
+        const status = node("span", "repo-status");
+        status.dataset.state = "checking";
+        status.append(
+          node("span", "dot"),
+          document.createTextNode("Checking…")
+        );
+
+        row.append(details, status);
+        return row;
+      }
+
+      function setStatus(row, state, label) {
+        const status = row.querySelector(".repo-status");
+        const dot = node("span", "dot");
+
+        if (state === "up") dot.classList.add("up");
+        if (state === "down") dot.classList.add("down");
+        if (state === "error") dot.classList.add("error");
+
+        status.dataset.state = state;
+        status.replaceChildren(dot, document.createTextNode(label));
+      }
+
+      async function checkRepository(repository, row) {
+        const url =
+          `${API}/repos/${encodeURIComponent(ORG)}/` +
+          encodeURIComponent(repository.name);
+
+        try {
+          await request(url);
+          setStatus(row, "up", "Operational");
+          return "up";
+        } catch (error) {
+          if (error.status === 404) {
+            setStatus(row, "down", "Unavailable");
+            return "down";
+          }
+
+          setStatus(
+            row,
+            "error",
+            error.status === 403 || error.status === 429
+              ? "API limit"
+              : "Check failed"
+          );
+
+          return "unknown";
+        }
+      }
+
+      function showError(error) {
+        let message =
+          "Could not load repositories. Check your connection and try again.";
+
+        if (error.status === 403 || error.status === 429) {
+          message =
+            "GitHub API rate limit reached. Please try again later.";
+        } else if (error.status === 404) {
+          message =
+            "Organization not found or not publicly accessible.";
+        }
+
+        el.list.replaceChildren(node("p", "empty", message));
+        el.count.textContent = "Discovery failed";
+        el.up.textContent = "—";
+        el.down.textContent = "—";
+        el.unknown.textContent = "—";
+        el.lastCheck.textContent =
+          `Last attempt: ${new Date().toLocaleString()}`;
+      }
+
+      async function runChecks() {
+        if (running) return;
+
+        running = true;
+        el.refresh.disabled = true;
+        el.refresh.textContent = "Checking…";
+        el.list.setAttribute("aria-busy", "true");
+
+        try {
+          el.count.textContent = "Discovering…";
+          el.list.replaceChildren(
+            node("p", "empty", "Discovering public repositories…")
+          );
+
+          const repositories = await discoverRepositories();
+
+          if (repositories.length === 0) {
+            el.list.replaceChildren(
+              node("p", "empty", "No public repositories found.")
+            );
+
+            el.count.textContent = "0 repositories";
+            el.up.textContent = "0";
+            el.down.textContent = "0";
+            el.unknown.textContent = "0";
+            el.lastCheck.textContent =
+              `Last checked: ${new Date().toLocaleString()}`;
+
+            return;
+          }
+
+          const items = repositories.map(repository => ({
+            repository,
+            row: makeRow(repository)
+          }));
+
+          el.list.replaceChildren(...items.map(item => item.row));
+          el.count.textContent =
+            `${repositories.length} repositories`;
+
+          let operational = 0;
+          let unavailable = 0;
+          let failed = 0;
+          let completed = 0;
+          let nextIndex = 0;
+
+          el.up.textContent = "0";
+          el.down.textContent = "0";
+          el.unknown.textContent = String(repositories.length);
+
+          async function worker() {
+            while (nextIndex < items.length) {
+              const item = items[nextIndex++];
+
+              const result = await checkRepository(
+                item.repository,
+                item.row
+              );
+
+              if (result === "up") operational++;
+              else if (result === "down") unavailable++;
+              else failed++;
+
+              completed++;
+
+              el.up.textContent = String(operational);
+              el.down.textContent = String(unavailable);
+              el.unknown.textContent = String(failed);
+              el.count.textContent =
+                `${completed}/${items.length} checked`;
+            }
+          }
+
+          await Promise.all(
+            Array.from(
+              { length: Math.min(CONCURRENCY, items.length) },
+              () => worker()
+            )
+          );
+
+          el.count.textContent =
+            `${repositories.length} repositories`;
+
+          el.lastCheck.textContent =
+            `Last checked: ${new Date().toLocaleString()}`;
+        } catch (error) {
+          showError(error);
+        } finally {
+          running = false;
+          el.refresh.disabled = false;
+          el.refresh.textContent = "↻ Refresh";
+          el.list.setAttribute("aria-busy", "false");
+        }
+      }
+
+      el.refresh.addEventListener("click", runChecks);
+      runChecks();
+    })();
+  </script>
+</body>
+</html>
