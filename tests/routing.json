@@ -1,1 +1,19 @@
-
+{
+  "tests": {
+    "simple": {
+      "description": "Basic tests for individual functions and standard cases.",
+      "repository": "https://github.com/SmallSmartSandbox/simple/",
+      "branch": "main"
+    },
+    "medium": {
+      "description": "Intermediate tests for component interactions and edge cases.",
+      "repository": "https://github.com/SmallSmartSandbox/medium",
+      "branch": "main"
+    },
+    "complex": {
+      "description": "Advanced tests for complex workflows and system behavior.",
+      "repository": "https://github.com/SmallSmartSandbox/complex",
+      "branch": "main"
+    }
+  }
+}
