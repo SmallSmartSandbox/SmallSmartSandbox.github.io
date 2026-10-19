@@ -1,14 +1,15 @@
-Routing system for the Small Smart Sandbox (SSSB).
+SSSB Routing System
 
-**Overview**
-This repository provides the routing system for the SSSB sandbox, managing navigation and route handling within the environment.
+Routing and navigation for the Small Smart Sandbox (SSSB).
 
-**Features**
-Centralized route management
-Navigation between sandbox pages
-GitHub Pages hosting
+Overview
 
-**Deployment**
-The project is hosted via GitHub Pages:
+The central entry point for navigating the SSSB sandbox and its components.
 
-https://smallsmartsandbox.github.io/
+Features
+Route Management — Centralized handling of routes.
+Navigation — Structured access to sandbox pages and components.
+Hosting — Published via GitHub Pages.
+Deployment
+
+Live: https://smallsmartsandbox.github.io/
