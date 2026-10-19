@@ -1,1 +1,8 @@
-
+{
+  "ethics": {
+    "description": "SSSB Code of Ethics for AI Systems.",
+    "repository": "https://github.com/SmallSmartSandbox/ethics",
+    "branch": "main",
+    "file": "code/code.md"
+  }
+}
