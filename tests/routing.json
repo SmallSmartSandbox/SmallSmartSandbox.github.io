@@ -1,19 +1,20 @@
 {
   "tests": {
-    "simple": {
-      "description": "Basic tests for individual functions and standard cases.",
-      "repository": "https://github.com/SmallSmartSandbox/simple/",
-      "branch": "main"
-    },
-    "medium": {
-      "description": "Intermediate tests for component interactions and edge cases.",
-      "repository": "https://github.com/SmallSmartSandbox/medium",
-      "branch": "main"
-    },
-    "complex": {
-      "description": "Advanced tests for complex workflows and system behavior.",
-      "repository": "https://github.com/SmallSmartSandbox/complex",
-      "branch": "main"
+    "repository": "https://github.com/SmallSmartSandbox/tests",
+    "branch": "main",
+    "levels": {
+      "simple": {
+        "description": "Basic tests for individual functions and standard cases.",
+        "path": "/simple/"
+      },
+      "medium": {
+        "description": "Intermediate tests for component interactions and edge cases.",
+        "path": "/medium/"
+      },
+      "complex": {
+        "description": "Advanced tests for complex workflows and system behavior.",
+        "path": "/complex/"
+      }
     }
   }
 }
