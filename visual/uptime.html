@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -189,18 +189,6 @@
       line-height: 1.8;
     }
 
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .count {
-      color: var(--muted);
-      font-size: 11px;
-      white-space: nowrap;
-    }
-
     .refresh {
       display: inline-flex;
       align-items: center;
@@ -212,6 +200,7 @@
       color: var(--text);
       font-size: 12px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .refresh:hover {
@@ -415,11 +404,6 @@
         flex-direction: column;
       }
 
-      .actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-
       .summary {
         grid-template-columns: 1fr;
       }
@@ -465,7 +449,7 @@
       <a class="brand" href="./index.html" aria-label="SSSB home">
         <img
           class="brand-logo"
-          src="./logo.png"
+          src="./visuals/logo.png"
           alt=""
           width="32"
           height="32"
@@ -492,7 +476,6 @@
         <span>status.</span>
       </h1>
 
-
       <p class="intro">
         A live overview of service availability across the Small Smart Sandbox infrastructure.
       </p>
@@ -503,20 +486,16 @@
         <div class="monitor-header">
           <div>
             <h2 id="monitor-heading">Availability Monitor</h2>
-            <p>Monitoring all currently existing SSSB services.</p>
+            <p>Monitoring the configured SSSB repositories.</p>
           </div>
 
-          <div class="actions">
-            <span class="count" id="uptime-count">Loading…</span>
-
-            <button
-              class="refresh"
-              id="uptime-refresh"
-              type="button"
-            >
-              ↻ Refresh
-            </button>
-          </div>
+          <button
+            class="refresh"
+            id="uptime-refresh"
+            type="button"
+          >
+            ↻ Refresh
+          </button>
         </div>
 
         <div class="summary" aria-live="polite">
@@ -545,7 +524,7 @@
           aria-live="polite"
           aria-busy="true"
         >
-          <p class="empty">Checking services…</p>
+          <p class="empty">Checking repositories…</p>
         </div>
 
         <div class="meta">
@@ -559,14 +538,14 @@
             View organization ↗
           </a>
         </div>
-        
+
         <div class="note">
-          This monitor checks the availability of configured services across the
-          Small Smart Sandbox infrastructure. It does not guarantee full
-          application functionality or performance. Network errors and failed
-          health checks are reported as unknown rather than confirmed downtime.
+          This monitor checks whether the configured GitHub repositories
+          are accessible through the GitHub API. It does not verify that
+          applications hosted by those repositories are running. Network
+          errors and failed checks are reported as unknown rather than
+          confirmed downtime.
         </div>
-        
       </section>
     </div>
   </main>
@@ -574,7 +553,7 @@
   <footer class="site-footer">
     <div class="container footer-content">
       <span>© Small Smart Sandbox</span>
-      <span>Service Monitoring</span>
+      <span>System Status</span>
     </div>
   </footer>
 
@@ -585,22 +564,20 @@
       const ORG = "SmallSmartSandbox";
       const API = "https://api.github.com";
 
-      // Only these two repositories are checked.
       const REPOSITORIES = [
         {
           name: "ethics",
-          description: "ethics for AI"
+          description: "Ethics for AI"
         },
         {
           name: "tests",
-          description: "test service for SSSB test  suite"
+          description: "Test service for the SSSB test suite"
         }
       ];
 
       const el = {
         list: document.getElementById("uptime-list"),
         refresh: document.getElementById("uptime-refresh"),
-        count: document.getElementById("uptime-count"),
         up: document.getElementById("uptime-up"),
         down: document.getElementById("uptime-down"),
         unknown: document.getElementById("uptime-unknown"),
@@ -673,10 +650,7 @@
         if (state === "error") dot.classList.add("error");
 
         status.dataset.state = state;
-        status.replaceChildren(
-          dot,
-          document.createTextNode(label)
-        );
+        status.replaceChildren(dot, document.createTextNode(label));
       }
 
       async function checkRepository(repository, row) {
@@ -694,34 +668,26 @@
             return "down";
           }
 
-          setStatus(
-            row,
-            "error",
+          const label =
             error.status === 403 || error.status === 429
               ? "API limit"
-              : "Check failed"
-          );
+              : "Check failed";
 
+          setStatus(row, "error", label);
           return "unknown";
         }
       }
 
-      function showError(error) {
-        let message =
-          "Could not check services. Check your connection and try again.";
+      function renderSummary(results) {
+        const totals = {
+          up: results.filter(status => status === "up").length,
+          down: results.filter(status => status === "down").length,
+          unknown: results.filter(status => status === "unknown").length
+        };
 
-        if (error.status === 403 || error.status === 429) {
-          message =
-            "GitHub API rate limit reached. Please try again later.";
-        }
-
-        el.list.replaceChildren(node("p", "empty", message));
-        el.count.textContent = "Check failed";
-        el.up.textContent = "0";
-        el.down.textContent = "0";
-        el.unknown.textContent = String(REPOSITORIES.length);
-        el.lastCheck.textContent =
-          `Last attempt: ${new Date().toLocaleString()}`;
+        el.up.textContent = String(totals.up);
+        el.down.textContent = String(totals.down);
+        el.unknown.textContent = String(totals.unknown);
       }
 
       async function runChecks() {
@@ -732,48 +698,49 @@
         el.refresh.textContent = "Checking…";
         el.list.setAttribute("aria-busy", "true");
 
+        const items = REPOSITORIES.map(repository => ({
+          repository,
+          row: makeRow(repository)
+        }));
+
+        el.list.replaceChildren(...items.map(item => item.row));
+
+        // Reset the summary while new results are being collected.
+        el.up.textContent = "—";
+        el.down.textContent = "—";
+        el.unknown.textContent = "—";
+
         try {
-          const items = REPOSITORIES.map(repository => ({
-            repository,
-            row: makeRow(repository)
-          }));
-
-          el.list.replaceChildren(...items.map(item => item.row));
-          el.count.textContent = `0/${items.length} checked`;
-
-          let operational = 0;
-          let unavailable = 0;
-          let unknown = 0;
-          let completed = 0;
-
-          el.up.textContent = "0";
-          el.down.textContent = "0";
-          el.unknown.textContent = String(items.length);
-
-          // Exactly two repository checks; no repository discovery.
           const results = await Promise.all(
             items.map(item =>
               checkRepository(item.repository, item.row)
             )
           );
 
-          for (const result of results) {
-            if (result === "up") operational++;
-            else if (result === "down") unavailable++;
-            else unknown++;
-          }
-
-          completed = results.length;
-
-          el.up.textContent = String(operational);
-          el.down.textContent = String(unavailable);
-          el.unknown.textContent = String(unknown);
-          el.count.textContent = `${completed}/${items.length} checked`;
+          // Summary counts come from the exact same results used by the rows.
+          renderSummary(results);
 
           el.lastCheck.textContent =
             `Last checked: ${new Date().toLocaleString()}`;
         } catch (error) {
-          showError(error);
+          const unknownResults = REPOSITORIES.map(() => "unknown");
+
+          items.forEach(item => {
+            setStatus(item.row, "error", "Check failed");
+          });
+
+          renderSummary(unknownResults);
+
+          el.list.prepend(
+            node(
+              "p",
+              "empty",
+              "Could not complete the checks. Please try again."
+            )
+          );
+
+          el.lastCheck.textContent =
+            `Last attempt: ${new Date().toLocaleString()}`;
         } finally {
           running = false;
           el.refresh.disabled = false;
@@ -783,8 +750,10 @@
       }
 
       el.refresh.addEventListener("click", runChecks);
+
       runChecks();
     })();
   </script>
 </body>
 </html>
+```
