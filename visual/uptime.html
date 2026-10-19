@@ -462,7 +462,7 @@
 <body>
   <header class="site-header">
     <nav class="container nav-inner" aria-label="Main navigation">
-      <a class="brand" href="./" aria-label="SSSB home">
+      <a class="brand" href="./index.html" aria-label="SSSB home">
         <img
           class="brand-logo"
           src="./logo.png"
@@ -475,7 +475,7 @@
 
       <div class="nav-right">
         <span class="nav-label">Infrastructure / Status</span>
-        <a class="back-link" href="./">← Back</a>
+        <a class="back-link" href="./index.html">← Back</a>
       </div>
     </nav>
   </header>
@@ -492,10 +492,9 @@
         <span>status.</span>
       </h1>
 
+
       <p class="intro">
-        A live overview of public repositories in the Small Smart
-        Sandbox organization. Each repository is checked through
-        the GitHub API.
+        A live overview of service availability across the Small Smart Sandbox infrastructure.
       </p>
 
       <div class="divider" aria-hidden="true"></div>
@@ -504,9 +503,7 @@
         <div class="monitor-header">
           <div>
             <h2 id="monitor-heading">Availability Monitor</h2>
-            <p>
-              Public repository discovery and availability checks.
-            </p>
+            <p>Monitoring all currently existing SSSB services.</p>
           </div>
 
           <div class="actions">
@@ -548,7 +545,7 @@
           aria-live="polite"
           aria-busy="true"
         >
-          <p class="empty">Discovering repositories…</p>
+          <p class="empty">Checking services…</p>
         </div>
 
         <div class="meta">
@@ -562,12 +559,14 @@
             View organization ↗
           </a>
         </div>
-
+        
         <div class="note">
-          This monitor checks public GitHub repository metadata. It does
-          not measure website uptime or application health. Network errors
-          and API limits are reported as unknown rather than downtime.
+          This monitor checks the availability of configured services across the
+          Small Smart Sandbox infrastructure. It does not guarantee full
+          application functionality or performance. Network errors and failed
+          health checks are reported as unknown rather than confirmed downtime.
         </div>
+        
       </section>
     </div>
   </main>
@@ -575,7 +574,7 @@
   <footer class="site-footer">
     <div class="container footer-content">
       <span>© Small Smart Sandbox</span>
-      <span>Repository Monitoring</span>
+      <span>Service Monitoring</span>
     </div>
   </footer>
 
@@ -585,7 +584,18 @@
 
       const ORG = "SmallSmartSandbox";
       const API = "https://api.github.com";
-      const CONCURRENCY = 5;
+
+      // Only these two repositories are checked.
+      const REPOSITORIES = [
+        {
+          name: "ethics",
+          description: "ethics for AI"
+        },
+        {
+          name: "tests",
+          description: "test service for SSSB test  suite"
+        }
+      ];
 
       const el = {
         list: document.getElementById("uptime-list"),
@@ -625,38 +635,19 @@
         return response.json();
       }
 
-      async function discoverRepositories() {
-        const repositories = [];
-
-        for (let page = 1; ; page++) {
-          const url =
-            `${API}/orgs/${ORG}/repos` +
-            `?per_page=100&page=${page}&type=public&sort=full_name`;
-
-          const batch = await request(url);
-          repositories.push(...batch);
-
-          if (batch.length < 100) break;
-        }
-
-        return repositories.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-      }
-
       function makeRow(repository) {
         const row = node("div", "repo-item");
         const details = node("div", "repo-details");
-        const link = node("a", "repo-name", repository.name);
 
-        link.href = repository.html_url;
+        const link = node("a", "repo-name", repository.name);
+        link.href = `https://github.com/${ORG}/${repository.name}`;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
 
         const description = node(
           "p",
           "repo-description",
-          repository.description || "No description provided."
+          repository.description
         );
 
         details.append(link, description);
@@ -669,6 +660,7 @@
         );
 
         row.append(details, status);
+
         return row;
       }
 
@@ -681,7 +673,10 @@
         if (state === "error") dot.classList.add("error");
 
         status.dataset.state = state;
-        status.replaceChildren(dot, document.createTextNode(label));
+        status.replaceChildren(
+          dot,
+          document.createTextNode(label)
+        );
       }
 
       async function checkRepository(repository, row) {
@@ -713,21 +708,18 @@
 
       function showError(error) {
         let message =
-          "Could not load repositories. Check your connection and try again.";
+          "Could not check services. Check your connection and try again.";
 
         if (error.status === 403 || error.status === 429) {
           message =
             "GitHub API rate limit reached. Please try again later.";
-        } else if (error.status === 404) {
-          message =
-            "Organization not found or not publicly accessible.";
         }
 
         el.list.replaceChildren(node("p", "empty", message));
-        el.count.textContent = "Discovery failed";
-        el.up.textContent = "—";
-        el.down.textContent = "—";
-        el.unknown.textContent = "—";
+        el.count.textContent = "Check failed";
+        el.up.textContent = "0";
+        el.down.textContent = "0";
+        el.unknown.textContent = String(REPOSITORIES.length);
         el.lastCheck.textContent =
           `Last attempt: ${new Date().toLocaleString()}`;
       }
@@ -741,79 +733,42 @@
         el.list.setAttribute("aria-busy", "true");
 
         try {
-          el.count.textContent = "Discovering…";
-          el.list.replaceChildren(
-            node("p", "empty", "Discovering public repositories…")
-          );
-
-          const repositories = await discoverRepositories();
-
-          if (repositories.length === 0) {
-            el.list.replaceChildren(
-              node("p", "empty", "No public repositories found.")
-            );
-
-            el.count.textContent = "0 repositories";
-            el.up.textContent = "0";
-            el.down.textContent = "0";
-            el.unknown.textContent = "0";
-            el.lastCheck.textContent =
-              `Last checked: ${new Date().toLocaleString()}`;
-
-            return;
-          }
-
-          const items = repositories.map(repository => ({
+          const items = REPOSITORIES.map(repository => ({
             repository,
             row: makeRow(repository)
           }));
 
           el.list.replaceChildren(...items.map(item => item.row));
-          el.count.textContent =
-            `${repositories.length} repositories`;
+          el.count.textContent = `0/${items.length} checked`;
 
           let operational = 0;
           let unavailable = 0;
-          let failed = 0;
+          let unknown = 0;
           let completed = 0;
-          let nextIndex = 0;
 
           el.up.textContent = "0";
           el.down.textContent = "0";
-          el.unknown.textContent = String(repositories.length);
+          el.unknown.textContent = String(items.length);
 
-          async function worker() {
-            while (nextIndex < items.length) {
-              const item = items[nextIndex++];
-
-              const result = await checkRepository(
-                item.repository,
-                item.row
-              );
-
-              if (result === "up") operational++;
-              else if (result === "down") unavailable++;
-              else failed++;
-
-              completed++;
-
-              el.up.textContent = String(operational);
-              el.down.textContent = String(unavailable);
-              el.unknown.textContent = String(failed);
-              el.count.textContent =
-                `${completed}/${items.length} checked`;
-            }
-          }
-
-          await Promise.all(
-            Array.from(
-              { length: Math.min(CONCURRENCY, items.length) },
-              () => worker()
+          // Exactly two repository checks; no repository discovery.
+          const results = await Promise.all(
+            items.map(item =>
+              checkRepository(item.repository, item.row)
             )
           );
 
-          el.count.textContent =
-            `${repositories.length} repositories`;
+          for (const result of results) {
+            if (result === "up") operational++;
+            else if (result === "down") unavailable++;
+            else unknown++;
+          }
+
+          completed = results.length;
+
+          el.up.textContent = String(operational);
+          el.down.textContent = String(unavailable);
+          el.unknown.textContent = String(unknown);
+          el.count.textContent = `${completed}/${items.length} checked`;
 
           el.lastCheck.textContent =
             `Last checked: ${new Date().toLocaleString()}`;
