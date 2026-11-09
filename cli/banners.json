@@ -1,0 +1,9 @@
+{
+  "banners": [
+    {
+      "id": "welcome-2026",
+      "level": "info",
+      "message": "Welcome to SmallSmartSandbox — run 'tests' to explore premade tasks."
+    }
+  ]
+}
