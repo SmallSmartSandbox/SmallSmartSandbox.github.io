@@ -2,18 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=./visual/index.html">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Redirecting…</title>
-  <link rel="canonical" href="./visual/index.html">
-  <script>
-    window.location.replace("./visual/index.html");
-  </script>
+  <title>Small Smart Sandbox (SSSB)</title>
+  <style>
+    :root { color-scheme: light; --bg:#ffffff; --surface:#f8f9fb; --border:#e8eaf0; --text:#171923; --muted:#737887; --accent:#4f46e5; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:var(--text); background:var(--bg); }
+    .container { width:min(100% - 48px, 960px); margin-inline:auto; }
+    header { border-bottom:1px solid var(--border); }
+    .nav { display:flex; align-items:center; justify-content:space-between; min-height:72px; gap:16px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:650; font-size:14px; }
+    .brand img { width:32px; height:32px; }
+    main { padding-block:80px; }
+    h1 { font-size:clamp(36px,7vw,64px); margin:0 0 16px; letter-spacing:-0.05em; }
+    .lead { color:var(--muted); font-size:16px; line-height:1.7; max-width:640px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:48px; }
+    .card { border:1px solid var(--border); border-radius:10px; padding:20px; background:var(--surface); }
+    .card h2 { margin:0 0 8px; font-size:15px; }
+    .card p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
+    .card a { display:inline-block; margin-top:12px; color:var(--accent); font-size:13px; font-weight:600; }
+    footer { border-top:1px solid var(--border); padding-block:20px; color:var(--muted); font-size:12px; }
+  </style>
 </head>
 <body>
-  <p>
-    Redirecting to
-    <a href="./visual/index.html">Visuals</a>…
-  </p>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <img src="./visual/logo.png" alt="">
+        <span>Small Smart Sandbox</span>
+      </div>
+      <span style="color:var(--muted);font-size:12px;">General Project Site</span>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <h1>Small Smart Sandbox</h1>
+      <p class="lead">
+        A controlled evaluation environment for AI agents: standardized tasks,
+        supervised tool use, and routing for tests, ethics, and infrastructure.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h2>Tests</h2>
+          <p>Automated task definitions across simple, medium, and complex levels.</p>
+          <a href="./tests/routing.json">Tests Routing ↗</a>
+        </div>
+        <div class="card">
+          <h2>Ethics</h2>
+          <p>The SSSB Code of Ethics for AI Systems.</p>
+          <a href="./ethics/routing.json">Ethics Routing ↗</a>
+        </div>
+        <div class="card">
+          <h2>Routing</h2>
+          <p>Infrastructure and routing references for the SSSB ecosystem.</p>
+          <a href="./routing.html">Routing About ↗</a>
+        </div>
+        <div class="card">
+          <h2>Visuals</h2>
+          <p>Status and visual assets for the sandbox.</p>
+          <a href="./visual/index.html">Visuals ↗</a>
+        </div>
+        <div class="card">
+          <h2>CLI</h2>
+          <p>Banners and assets for the command-line interface.</p>
+          <a href="./cli/banners.json">CLI Banners ↗</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="container">© Small Smart Sandbox</div>
+  </footer>
 </body>
 </html>
