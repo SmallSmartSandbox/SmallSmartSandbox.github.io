@@ -9,11 +9,6 @@
       "id": "tip-tools",
       "level": "success",
       "message": "Tip: use 'setup' to configure tools and model interactively."
-    },
-    {
-      "id": "notice-network",
-      "level": "warning",
-      "message": "Network tools require SSSB_ALLOW_PRIVATE_URLS for localhost access."
     }
   ]
 }
