@@ -4,29 +4,238 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Small Smart Sandbox (SSSB)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: light; --bg:#ffffff; --surface:#f8f9fb; --border:#e8eaf0; --text:#171923; --muted:#737887; --accent:#4f46e5; }
+    :root {
+      color-scheme: light;
+      --bg: #fafbff;
+      --surface: #ffffff;
+      --border: #e6e8f0;
+      --text: #15172a;
+      --muted: #6b7084;
+      --accent: #5b5cff;
+      --accent-soft: #eef0ff;
+      --shadow: 0 1px 2px rgba(20, 22, 40, 0.04), 0 8px 24px rgba(20, 22, 40, 0.06);
+    }
+
     * { box-sizing: border-box; }
-    body { margin:0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:var(--text); background:var(--bg); }
-    .container { width:min(100% - 48px, 1080px); margin-inline:auto; }
-    header { border-bottom:1px solid var(--border); }
-    .nav { display:flex; align-items:center; justify-content:space-between; min-height:72px; gap:16px; flex-wrap:wrap; }
-    .brand { display:flex; align-items:center; gap:12px; font-weight:650; font-size:14px; }
-    .brand img { width:32px; height:32px; }
-    main { padding-block:72px; }
-    h1 { font-size:clamp(36px,7vw,64px); margin:0 0 16px; letter-spacing:-0.05em; }
-    .lead { color:var(--muted); font-size:17px; line-height:1.7; max-width:760px; }
-    .section { margin-top:56px; }
-    .section h2 { font-size:20px; margin:0 0 16px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
-    .card { border:1px solid var(--border); border-radius:10px; padding:20px; background:var(--surface); }
-    .card h3 { margin:0 0 8px; font-size:15px; }
-    .card p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
-    .card a { display:inline-block; margin-top:12px; color:var(--accent); font-size:13px; font-weight:600; }
-    .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-    .tag { border:1px solid var(--border); border-radius:999px; padding:6px 12px; font-size:12px; color:var(--muted); background:var(--surface); }
-    footer { border-top:1px solid var(--border); padding-block:20px; color:var(--muted); font-size:12px; }
-    ul { color:var(--muted); line-height:1.8; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 10% -10%, #eef0ff 0%, transparent 60%),
+                  radial-gradient(900px 500px at 100% 0%, #f3f0ff 0%, transparent 55%),
+                  var(--bg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container { width: min(100% - 40px, 980px); margin-inline: auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: saturate(180%) blur(10px);
+      background: rgba(250, 251, 255, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 68px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 650;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand img { width: 28px; height: 28px; }
+
+    .nav-meta { color: var(--muted); font-size: 12px; }
+
+    main { padding-block: 72px 96px; }
+
+    .hero { max-width: 760px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(40px, 7.5vw, 68px);
+      font-weight: 700;
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+
+    .lead {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+      max-width: 640px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 26px;
+    }
+
+    .tag {
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .section {
+      margin-top: 64px;
+      padding-top: 8px;
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 720px;
+    }
+
+    .list {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      max-width: 720px;
+    }
+
+    .list li {
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      font-size: 14px;
+      color: var(--text);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .list li:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(20,22,40,0.05), 0 12px 28px rgba(20,22,40,0.08);
+    }
+
+    .list li span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .resources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .res {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .res:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .res::after { content: "↗"; font-size: 11px; opacity: 0.7; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-block: 22px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(100% - 32px, 980px); }
+      main { padding-block: 56px 72px; }
+      .list li { font-size: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -36,42 +245,45 @@
         <img src="./logo.png" alt="">
         <span>Small Smart Sandbox</span>
       </div>
-      <span style="color:var(--muted);font-size:12px;">General Project Site</span>
+      <span class="nav-meta">General project site</span>
     </div>
   </header>
+
   <main>
     <div class="container">
-      <h1>Small Smart Sandbox</h1>
-      <p class="lead">
-        An experimental project for testing and studying autonomous AI behavior in controlled environments.
-        Explore AI capabilities, observe emerging behaviors, and develop methods for monitoring, evaluating,
-        and improving AI safety.
-      </p>
+      <section class="hero">
+        <div class="eyebrow">Experimental · Open Source</div>
+        <h1>Small Smart Sandbox</h1>
+        <p class="lead">
+          A controlled environment for testing and studying autonomous AI behavior —
+          how models plan, use tools, adapt, and stay within bounds.
+        </p>
 
-      <div class="tags">
-        <span class="tag">Autonomous AI behavior</span>
-        <span class="tag">AI safety &amp; ethics</span>
-        <span class="tag">Model evaluation</span>
-        <span class="tag">Monitoring &amp; containment</span>
-        <span class="tag">Local AI experimentation</span>
-      </div>
-
+        <div class="tags">
+          <span class="tag">Autonomous behavior</span>
+          <span class="tag">Goal pursuit</span>
+          <span class="tag">Tool use</span>
+          <span class="tag">Adaptation</span>
+          <span class="tag">Safety mechanisms</span>
+          <span class="tag">Containment</span>
+        </div>
+      </section>
 
       <section class="section">
-        <h2>Focus Areas</h2>
-        <ul>
-          <li>Autonomous behavior — how a model plans and acts without step-by-step instructions.</li>
-          <li>Goal pursuit — whether and how it works toward a given objective.</li>
-          <li>Tool use — when it decides to read/edit files or exchange data with a server.</li>
-          <li>Adaptation — how it reacts to errors, feedback, and changing conditions.</li>
-          <li>Safety mechanisms — which actions are permitted and how limits are enforced.</li>
-          <li>Containment — how well the agent stays inside the sandbox.</li>
+        <h2>Focus</h2>
+        <ul class="list">
+          <li>Autonomous behavior <span>— how a model plans and acts without step-by-step instructions.</span></li>
+          <li>Goal pursuit <span>— whether and how it works toward a given objective.</span></li>
+          <li>Tool use <span>— when it decides to read or edit files, or exchange data with a server.</span></li>
+          <li>Adaptation <span>— how it reacts to errors, feedback, and changing conditions.</span></li>
+          <li>Safety mechanisms <span>— which actions are permitted and how limits are enforced.</span></li>
+          <li>Containment <span>— how well the agent stays inside the sandbox.</span></li>
         </ul>
       </section>
 
       <section class="section">
         <h2>Status</h2>
-        <p style="color:var(--muted);line-height:1.7;">
+        <p>
           Early development. The project is experimental and its methods and goals may evolve over time.
           The interactive entry point is still under active development.
         </p>
@@ -79,16 +291,17 @@
 
       <section class="section">
         <h2>Resources</h2>
-        <p style="color:var(--muted);line-height:1.8;">
-          <a href="./../tests/routing.json" style="color:var(--accent);font-weight:600;">Tests</a> ·
-          <a href="./../ethics/routing.json" style="color:var(--accent);font-weight:600;">Ethics</a> ·
-          <a href="./../index.html" style="color:var(--accent);font-weight:600;">Routing</a> ·
-          <a href="./uptime.html" style="color:var(--accent);font-weight:600;">Status</a>
-        </p>
+        <div class="resources">
+          <a class="res" href="./../tests/routing.json">Tests</a>
+          <a class="res" href="./../ethics/routing.json">Ethics</a>
+          <a class="res" href="./../index.html">Routing</a>
+          <a class="res" href="./uptime.html">Status</a>
+          <a class="res" href="https://github.com/SmallSmartSandbox">GitHub</a>
+        </div>
       </section>
-
     </div>
   </main>
+
   <footer>
     <div class="container">© Small Smart Sandbox</div>
   </footer>
